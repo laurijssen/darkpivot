@@ -17,7 +17,7 @@ void init_shell()
     clear();
     printf("\n\n******************"
         "************************");
-    printf("\n\I love nGummibears!");
+    printf("\n\nI love nGummibears!");
     printf("\n\n*******************"
         "***********************");
     printf("\n\nwelcome\n");
