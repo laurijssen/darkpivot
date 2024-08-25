@@ -14,16 +14,16 @@ func check(e error) {
 }
 
 type MainFile struct {
-	Data map[string]Object
+	Data []Object
 }
 
 type Object struct {
 	Name  string
-	Value int
+	Value interface{}
 }
 
 var (
-	data    = MainFile{}
+	file    = MainFile{}
 	expect1 = CURLY_OPEN
 	expect2 = SQUARE_OPEN
 )
@@ -137,6 +137,8 @@ func get_next_valid_tokens(expect Token, quot bool) (Token, Token) {
 }
 
 func main() {
+	file.Data = []Object{}
+
 	//cmd := ""
 
 	//if len(os.Args) == 2 {
@@ -162,7 +164,6 @@ func main() {
 		idx := 0
 		b := s.Bytes()
 		quot := false
-		//fmt.Printf("%s\n", string(b[idx:]))
 
 		for {
 			tok, cur := next_token(b[idx:], expect1, expect2)
@@ -171,7 +172,6 @@ func main() {
 			}
 
 			print_token(tok)
-			idx += cur + 1
 
 			valid := expect2 != -1 && tok == expect2
 
@@ -181,17 +181,18 @@ func main() {
 				expect1 = expect2
 			}
 
-			if expect1 == QUOT {
+			switch expect1 {
+			case QUOT:
 				quot = !quot
+				if quot {
+					file.Data = append(file.Data, Object{})
+				}
+			}
+			if valid {
+				expect1, expect2 = get_next_valid_tokens(expect1, quot)
 			}
 
-			if valid {
-				//				fmt.Printf("2 ")
-				//				print_token(expect1)
-				expect1, expect2 = get_next_valid_tokens(expect1, quot)
-				//				fmt.Printf("3 ")
-				//				print_token(expect1)
-			}
+			idx += cur + 1
 		}
 	}
 }
