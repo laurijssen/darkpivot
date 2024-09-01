@@ -3,9 +3,74 @@ package main
 import (
 	"bufio"
 	"fmt"
+
 	"os"
 	"unicode"
 )
+
+const (
+	INT    = 1
+	STRING = 2
+	NULL   = 3
+	OBJECT = 4
+)
+
+type ValueType int
+
+type Value struct {
+	Type ValueType
+	Val  interface{}
+}
+
+type JSObject struct {
+	Objects []*JSObject
+
+	Key   string
+	Value Value
+}
+
+type JSFile struct {
+	Objects []*JSObject
+}
+
+func createFile() {
+	var file = JSFile{}
+
+	file.Objects = make([]*JSObject, 2)
+
+	newobject := &JSObject{Objects: make([]*JSObject, 2)}
+	newobject.Objects[0] = &JSObject{Key: "int", Value: Value{Type: INT, Val: 1}}
+	newobject.Objects[1] = &JSObject{Key: "string", Value: Value{Type: STRING, Val: "test"}}
+
+	file.Objects[0] = newobject
+	file.Objects[1] = newobject
+
+	write_jsobjects(file.Objects)
+}
+
+func write_value(obj *JSObject) {
+	format := ""
+	switch obj.Value.Type {
+	case INT:
+		format = "%s %d\n"
+	case STRING:
+		format = "%s %s\n"
+	case NULL:
+		format = "%s null\n"
+	}
+
+	fmt.Printf(format, obj.Key, obj.Value.Val)
+}
+
+func write_jsobjects(o []*JSObject) {
+	for _, obj := range o {
+		if obj.Objects != nil {
+			write_jsobjects(obj.Objects)
+		} else {
+			write_value(obj)
+		}
+	}
+}
 
 func check(e error) {
 	if e != nil {
@@ -13,17 +78,7 @@ func check(e error) {
 	}
 }
 
-type MainFile struct {
-	Data []Object
-}
-
-type Object struct {
-	Name  string
-	Value interface{}
-}
-
 var (
-	file    = MainFile{}
 	expect1 = CURLY_OPEN
 	expect2 = SQUARE_OPEN
 )
@@ -137,7 +192,7 @@ func get_next_valid_tokens(expect Token, quot bool) (Token, Token) {
 }
 
 func main() {
-	file.Data = []Object{}
+	//file.Data = []Object{}
 
 	//cmd := ""
 
@@ -185,7 +240,7 @@ func main() {
 			case QUOT:
 				quot = !quot
 				if quot {
-					file.Data = append(file.Data, Object{})
+					//file.Data = append(file.Data, Object{})
 				}
 			}
 			if valid {
@@ -195,4 +250,6 @@ func main() {
 			idx += cur + 1
 		}
 	}
+
+	createFile()
 }
